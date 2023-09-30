@@ -2,12 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def findROC(ys, thress):
+    idx = np.argsort(thress)[::-1]
+    ys = ys[idx]
+    thress = thress[idx]
+
     tprs = []
     fprs = []
 
-    cs = [0]
+    cs = [1]
     cs.extend(thress)
-    cs.append(1)
+    cs.append(0)
 
     for c in cs:
         yhats = np.array(thress) > c
@@ -23,8 +27,16 @@ def findROC(ys, thress):
 
         print(tpr, fpr)
 
+        if len(tprs) != 0:
+            tprs.append(tpr)
+            fprs.append(fprs[-1])
         tprs.append(tpr)
         fprs.append(fpr)
+
+    tprs.append(1)
+    fprs.append(fprs[-1])
+    tprs.append(1)
+    fprs.append(1)
 
     return tprs, fprs
 
