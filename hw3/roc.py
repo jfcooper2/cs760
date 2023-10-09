@@ -27,14 +27,14 @@ def findROC(ys, thress):
 
         print(tpr, fpr)
 
-        if len(tprs) != 0:
-            tprs.append(tpr)
-            fprs.append(fprs[-1])
+        #if len(tprs) != 0:
+        #    tprs.append(tpr)
+        #    fprs.append(fprs[-1])
         tprs.append(tpr)
         fprs.append(fpr)
 
-    tprs.append(1)
-    fprs.append(fprs[-1])
+    #tprs.append(1)
+    #fprs.append(fprs[-1])
     tprs.append(1)
     fprs.append(1)
 
@@ -43,12 +43,19 @@ def findROC(ys, thress):
 def plotROC(ys, thress, show=False):
     tprs, fprs = findROC(ys, thress)
 
+    s = 0 # AOC calculation
+    for i in range(len(tprs)-1):
+        s += (fprs[i+1] - fprs[i]) * (tprs[i+1] + tprs[i]) / 2
+
     plt.plot(fprs, tprs)
     plt.xlabel("FPR")
     plt.ylabel("TPR")
     plt.title("ROC Curve")
+    plt.legend(["AOC: %.3f" % s])
 
     plt.plot([0,1], [0,1])
 
     if show:
         plt.show()
+
+    return s

@@ -19,14 +19,16 @@ def recall(ys_true, ys_model):
     return tp / (tp + fn)
 
 def sigmoid(xs):
-    return np.divide(1, 1 + np.exp(xs))
+    return np.divide(1, 1 + np.exp(-xs))
 
 
 def logistic(xs_train, xs_test, classes_train, eta=1e-4):
     n = xs_train.shape[0]
     d = xs_train.shape[1]
     theta = np.zeros(d)
-    for itr in range(100):
+    vtheta = np.zeros(d) # added momentum to accel convergence
+    for itr in range(100000):
+        vtheta *= 0.995
         f = sigmoid(np.dot(xs_train, theta)) # indexed over all i in n
         #print(np.sum(f>0.5))
         dtheta = np.zeros(d)
@@ -34,8 +36,9 @@ def logistic(xs_train, xs_test, classes_train, eta=1e-4):
             dtheta += (1.0/n) * (f[i] - classes_train[i]) * xs_train[i]
         if itr % 10 == 0:
             print(np.max(np.abs(dtheta)))
-        theta += eta * dtheta
-    print("Theta:", theta)
+        vtheta -= eta * dtheta
+        theta += vtheta
+    #print("Theta:", theta)
 
     f = sigmoid(np.dot(xs_test, theta))
     print(np.sum(f > 0.5))
@@ -43,6 +46,7 @@ def logistic(xs_train, xs_test, classes_train, eta=1e-4):
 
 def logistic_crossval(xs, classes, k=1, fold=5):
     xs = np.insert(xs, -1, 1, axis=1)
+    #xs /= np.mean(xs)
     n_all = xs.shape[0] * 1.0
     accuracies = []
     precisions = []
