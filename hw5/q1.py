@@ -80,22 +80,25 @@ for sigma in sigmas:
     plt.figure()
     plt.scatter(xs[:,0], xs[:,1], c=classes)
     plt.scatter(mus[:,0], mus[:,1], c='orange')
+    plt.title("K-means")
     plt.show()
     """
 
+    # I know this is K-means, but it ruins the clean formating to change it
     print("Sigma: %2f  |  KNN Obj: %.3f  |  KNN Acc: %.3f" % (sigma, best_obj, best_acc))
 
     # GMMS
     best_obj = 1000
+    best_knn_obj = 1000
     best_acc = 0
-    for itr in range(10):
+    for itr in range(20):
         gmm_mus = xs[np.random.choice(np.arange(xs.shape[0]), 3)]
         covs = np.zeros((3,2,2))
         for i in range(3):
             covs[i] = np.eye(2)
         priors = np.ones(3) / 3
 
-        for run in range(100):
+        for run in range(500): # 100
             # E
             ws = np.zeros((xs.shape[0], 3))
             for i in range(3):
@@ -115,6 +118,13 @@ for sigma in sigmas:
                 for j in range(xs.shape[0]):
                     covs[i] += ws[j,i] * np.outer(xs[j] - gmm_mus[i], xs[j] - gmm_mus[i])
                 covs[i] /= np.sum(ws[:,i])
+
+        classes = np.argmax(ws, axis=1)
+
+        knn_obj = 0
+        knn_obj += np.sum(np.linalg.norm(xs[classes == 0] - mus[0], axis=1))
+        knn_obj += np.sum(np.linalg.norm(xs[classes == 1] - mus[1], axis=1))
+        knn_obj += np.sum(np.linalg.norm(xs[classes == 2] - mus[2], axis=1))
 
         gmm_obj = 0
         for i in range(xs.shape[0]):
@@ -141,13 +151,16 @@ for sigma in sigmas:
         gmm_acc /= xs.shape[0]
 
         if best_obj > gmm_obj: best_obj = gmm_obj
+        if best_knn_obj > knn_obj: best_knn_obj = knn_obj
         if best_acc < gmm_acc: best_acc = gmm_acc
 
     """
     plt.figure()
     plt.scatter(xs[:,0], xs[:,1], c=classes)
     plt.scatter(gmm_mus[:,0], gmm_mus[:,1], c='orange')
+    plt.title("GMM")
     plt.show()
     """
 
-    print("Sigma: %2f  |  GMM Obj: %.3f  |  GMM Acc: %.3f" % (sigma, best_obj, best_acc))
+    print("Sigma: %2f  |  GMM Obj: %.3f  |  GMM Acc: %.3f" % (sigma, best_knn_obj, best_acc))
+    #print("Sigma: %2f  |  GMM Obj: %.3f  |  GMM Acc: %.3f" % (sigma, knn_obj, best_acc))
